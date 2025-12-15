@@ -46,6 +46,8 @@ const Login = () => {
     } else {
       setError("Tipo de usuario no válido.");
     }
+
+    navigate("/home");
   };
 
   return (
