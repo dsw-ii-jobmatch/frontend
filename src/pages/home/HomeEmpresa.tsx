@@ -5,6 +5,7 @@ import CandidatosVacante from "../../components/CandidatosVacante";
 import { supabase } from "../../lib/supabaseClient";
 
 const HomeEmpresa = () => {
+  const [trigger, setTrigger] = useState(0);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
   const [vacantes, setVacantes] = useState<any[]>([]);
   const [openModal, setOpenModal] = useState(false);
@@ -44,24 +45,24 @@ const HomeEmpresa = () => {
   /* =========================
      CARGAR VACANTES
   ==========================*/
-  const fetchVacantes = async () => {
-    if (!empresaId) return;
-
-    setLoadingVacantes(true);
-
-    const { data, error } = await supabase
-      .from("vacantes")
-      .select("*")
-      .eq("empresa_id", empresaId)
-      .order("fecha_publicacion", { ascending: false });
-
-    if (!error) setVacantes(data ?? []);
-    setLoadingVacantes(false);
-  };
-
   useEffect(() => {
-    if (empresaId && tipoUsuario === "empresa") fetchVacantes();
-  }, [empresaId, tipoUsuario]);
+    const fetchVacantes = async () => {
+      if (!empresaId || tipoUsuario !== "empresa") return;
+
+      setLoadingVacantes(true);
+
+      const { data, error } = await supabase
+        .from("vacantes")
+        .select("*")
+        .eq("empresa_id", empresaId)
+        .order("fecha_publicacion", { ascending: false });
+
+      if (!error) setVacantes(data ?? []);
+      setLoadingVacantes(false);
+    };
+
+    fetchVacantes();
+  }, [empresaId, tipoUsuario, trigger]);
 
   /* =========================
      ELIMINAR VACANTE
@@ -81,7 +82,7 @@ const HomeEmpresa = () => {
     if (error) {
       alert("Error al eliminar vacante");
     } else {
-      fetchVacantes();
+      setTrigger(prev => prev + 1);
     }
   };
 
@@ -201,7 +202,7 @@ const HomeEmpresa = () => {
               empresaId={empresaId ?? undefined}
               vacante={vacanteEditar}   // 👈 IMPORTANTE
               onCreated={() => {
-                fetchVacantes();
+                setTrigger(prev => prev + 1);
                 setOpenModal(false);
               }}
             />

@@ -100,7 +100,7 @@ const Vacante = ({ empresaId, vacante = null, onCreated }: Props) => {
         if (error) throw error;
       }
 
-      onCreated && onCreated();
+      onCreated?.();
     } catch (err: any) {
       console.error("Error guardando vacante:", err);
       alert(err.message ?? "Error guardando vacante");
