@@ -12,59 +12,90 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
-    const { data: loginData, error: loginError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (loginError) {
-      setError(loginError.message);
+    if (authError) {
+      setError(authError.message);
       return;
     }
 
-    const user = loginData.user;
+    const user = authData.user;
+    if (!user) {
+      setError("No se encontró el usuario.");
+      return;
+    }
 
-    // Trae su rol de la tabla "usuarios"
-    const { data: perfil } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from("usuarios")
-      .select("tipo")
+      .select("*")
       .eq("user_id", user.id)
       .single();
 
-    if (!perfil) {
-      setError("No existe perfil, registra uno.");
+    if (userError || !userData) {
+      setError("No se pudo obtener el tipo de usuario.");
       return;
+    }
+
+    if (userData.tipo === "empleado") {
+      navigate("/home");
+    } else if (userData.tipo === "empresa") {
+      navigate("/homeEmpresa");
+    } else {
+      setError("Tipo de usuario no válido.");
     }
 
     navigate("/home");
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Correo"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm">
+        <h2 className="text-2xl font-bold text-center mb-6">Iniciar Sesión</h2>
 
-        <button type="submit">Iniciar sesión</button>
-      </form>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Correo"
+            className="w-full px-4 py-2 border rounded-lg outline-none focus:border-blue-500"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-      <button onClick={() => navigate("/registro")}>
-        Crear cuenta
-      </button>
+          <input
+            type="password"
+            placeholder="Contraseña"
+            className="w-full px-4 py-2 border rounded-lg outline-none focus:border-blue-500"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Iniciar sesión
+          </button>
+        </form>
+
+        {/* Mostrar errores */}
+        {error && <p className="text-red-600 text-center mt-4">{error}</p>}
+
+        {/* Botón para registrarse */}
+        <p className="text-center mt-6 text-sm">
+          ¿No tienes cuenta?{" "}
+          <button
+            className="text-blue-600 font-semibold hover:underline"
+            onClick={() => navigate("/Registro")}
+          >
+            Crear cuenta
+          </button>
+        </p>
+      </div>
     </div>
   );
 };

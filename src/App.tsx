@@ -5,6 +5,10 @@ import HomeEmpresa from "./pages/home/HomeEmpresa";
 import Registro from "./pages/registro/Registro";
 import { supabase } from "./lib/supabaseClient";
 import { useEffect, useState } from "react";
+import Registro from "./pages/login/Registro.tsx";
+import HomeEmpresa from "./pages/home/HomeEmpresa.tsx";
+
+
 
 const App = () => {
   const [session, setSession] = useState<any>(null);
@@ -58,21 +62,18 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={session ? <RutaHome /> : <Login />}
-        />
-
-        {/* Rutas según rol */}
-        <Route path="/home-empleado" element={<HomeEmpleado />} />
-        <Route path="/home-empresa" element={<HomeEmpresa />} />
-
-        <Route path="/registro" element={<Registro />} />
-
-        {/* Página /home redirige automáticamente según tipo */}
-        <Route path="/home" element={<RutaHome />} />
-      </Routes>
+        <Routes>
+          <Route
+            path="/"
+            element={session ? <Navigate to="/home" /> : <Login />}
+          />
+          <Route
+            path="/home"
+            element={session ? <Home /> : <Navigate to="/" />}
+          />
+          <Route path="/registro" element={<Registro />} />
+          <Route path="/homeEmpresa" element={<HomeEmpresa />} />
+        </Routes>
     </BrowserRouter>
   );
 };
