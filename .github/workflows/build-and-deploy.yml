@@ -25,6 +25,9 @@ jobs:
       - name: Run linter
         run: npm run lint
 
+      - name: Build project
+        run: npm run build
+
       - name: Deploy to Netlify
         id: netlify
         run: |
